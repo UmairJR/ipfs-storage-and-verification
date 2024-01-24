@@ -1,0 +1,162 @@
+import React, {useState, useEffect} from "react";
+import styles from "./page.module.css";
+import Web3 from 'web3';
+import MyContract from './abi/Og.json';
+import { initializeW3UpClient, uploadFileToW3 } from './w3';
+import { setRequestMeta } from "next/dist/server/request-meta";
+
+function App() {
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState("");
+  const [result, setResult] = useState("");
+  const [imgHash, setImgHash] = useState("");
+  const [ipfsHash, setIpfsHash] = useState("");
+  const [web3, setWeb3] = useState(null);
+  const [accounts, setAccounts] = useState(null);
+  const [contract, setContract] = useState(null);
+
+  const initializeWeb3 = async () => {
+    try {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        const web3Instance = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3Instance.eth.getAccounts();
+        console.log('Current account:', accounts[0]);
+        const contract = new web3Instance.eth.Contract(
+          MyContract.abi,
+          "0x6164b6d5a8fcFC5843657D70BF0cE23c25e53bB3"
+        );
+        setWeb3(web3Instance);
+        setAccounts(accounts);
+        setContract(contract);
+      } else {
+        console.error('MetaMask not detected');
+        const provider = new Web3.providers.HttpProvider('http://127.0.0.1:7545');
+        const web3Instance = new Web3(provider);
+        setWeb3(web3Instance);
+      }
+    } catch (error) {
+      console.error('Error initializing Web3:', error);
+    }
+  };
+
+  useEffect(() => {
+    initializeWeb3();
+  }, []);
+
+  const handleChange = (e) => {
+    if (e.target.name === "filename") {
+      setFileName(e.target.value);
+    }
+    if (e.target.name === "file") {
+      setFile(e.target.files[0]);
+    }
+    if (e.target.name === "hash") {
+      setIpfsHash(e.target.value);
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const isStored = await contract.methods.isFileStored(fileName).call();
+      console.log('Is file stored:', isStored);
+
+      if (!isStored) {
+        try {
+          await initializeW3UpClient();
+          const cid = await uploadFileToW3(file);
+          const hash = cid.toString();
+          setResult(hash);
+
+          console.log('Storing the data in IPFS');
+          const tx = await contract.methods.upload(fileName, hash).send({
+            from: accounts[0],
+          });
+
+          console.log('Transaction hash:', tx.transactionHash);
+        } catch (error) {
+          console.error('File upload error:', error);
+        }
+      } else {
+        console.log('Data is already stored for this IPFS hash');
+        const storedHash = await contract.methods.getIpfsHash(fileName).call();
+        console.log(`IPFS hash is already stored in the smart contract: ${storedHash}`);
+        setFileName('');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const verify = async () => {
+    try {
+      console.log(ipfsHash);
+      const isStored = await contract.methods.isFileStoredByHash(ipfsHash).call();
+      console.log('Is file stored by hash:', isStored);
+
+      if (isStored) {
+        console.log("Document present. You are a Valid seller.");
+        const IPFShash = await contract.methods.getIpfsHashByHash(ipfsHash).call();
+        console.log(`IPFS hash is stored in the smart contract: ${IPFShash}`);
+        setImgHash(IPFShash);
+        alert("Document present. You are a Valid seller.");
+      } else {
+        console.log("Document not present. You are not a valid seller.");
+        setImgHash(null);
+        alert("Document not present. You are not a valid seller.");
+      }
+    } catch (error) {
+      console.error('Error verifying:', error);
+    }
+  };
+
+
+  return(
+    <>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1>⁂<span>Store IPFS hash on blockchain</span>⁂</h1>
+      </header>
+      <form onSubmit={handleSubmit}>
+        <label className={styles.lable}>Enter Unique Filename: </label>
+        <input type="text" name="filename" value={fileName} onChange={handleChange} className={styles.input}></input>
+        <br />
+        <input type="file" name="file" onChange={handleChange} className={styles.input}></input>
+        <br />
+        <input type="Submit" className={styles.button}></input>
+      </form>
+
+      {result && <p className={styles.result}>{result}</p>}
+    </div>
+    <div className={styles.container}>
+    <br/>
+      <header className={styles.header}>
+        <h1>⁂<span>Verify IPFS hash on blockchain</span>⁂</h1>
+      </header>
+      <div >
+        <label className={styles.lable}>Enter Hashkey: </label>
+        <input type="text" name="hash" onChange={handleChange} className={styles.input}></input>
+        <br />
+        <button className={styles.button} onClick={verify}>Verify</button>
+      </div>
+
+      {imgHash && (
+          <div>
+            <h2>Uploaded Image:</h2>
+            <img
+              src={`https://${imgHash}.ipfs.w3s.link`}
+              alt="Uploaded"
+              height={200}
+              width={300}
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+        )}
+    </div>
+    </>
+  )
+}
+
+export default App;

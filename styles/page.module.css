@@ -1,0 +1,132 @@
+.verifyContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60vh;
+}
+.uploadContainer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  min-height: 70vh;
+}
+
+.leftContainer {
+  width: 100%;
+  max-width: 400px;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin: auto;
+}
+
+.rightContainer {
+  width: 48%;
+  text-align: center;
+}
+
+.uploadedImage {
+  max-width: 120%; /* Make the image 20% larger */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  border: 2px solid #101416;
+  transition: transform 0.3s ease;
+  margin-top: 15px; /* Move the image down by 15 pixels */
+}
+
+.uploadedImage:hover {
+  transform: scale(1.1); /* Enlarge the image on hover */
+}
+
+.heading {
+  text-align: center;
+  padding: 20px;
+  background-color: #3498db;
+  color: #fff;
+}
+
+.contentContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+.resultContainer {
+  max-width: 400px;
+  flex-grow: 1; 
+  text-align: center;
+}
+
+.resultHeader {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  border-bottom: 2px solid #3498db; 
+  padding-bottom: 8px;
+}
+
+.resultHeading {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.resultHash {
+  font-size: 18px;
+  color: #333;
+  padding: 5px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin:0;
+}
+
+.label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #3498db;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #2980b9;
+}
+.formContainer {
+  width: 48%;
+  box-sizing: border-box;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin: auto 0; 
+}
